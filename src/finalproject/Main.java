@@ -1,0 +1,167 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
+ */
+package finalproject;
+
+import org.lwjgl.LWJGLException;
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.DisplayMode;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.glu.GLU;
+
+public class Main {
+
+    private static final int WIDTH = 640;
+    private static final int HEIGHT = 480;
+
+    private static final float MOUSE_SENS = 0.18f;
+    private static final float MOVE_SPEED = 0.1f;
+
+    private Camera camera;
+
+    public static void main(String[] args) throws Exception {
+        new Main().run();
+    }
+
+    private void run() throws LWJGLException {
+        initDisplay();
+        initGL();
+
+        camera = new Camera(0f, 2f, 6f); // start a little back & up
+        Mouse.setGrabbed(true);          // lock cursor for FPS feel
+
+        gameLoop();
+
+        Mouse.setGrabbed(false);
+        Display.destroy();
+    }
+
+    private void initDisplay() throws LWJGLException {
+        Display.setDisplayMode(new DisplayMode(WIDTH, HEIGHT));
+        Display.setTitle("CS4450 Final Program");
+
+        // center using physical desktop resolution (DPI-safe)
+        DisplayMode dm = Display.getDesktopDisplayMode();
+        int x = (dm.getWidth()  - WIDTH)  / 2;
+        int y = (dm.getHeight() - HEIGHT) / 2;
+        Display.setLocation(x, y);
+
+        Display.create();
+    }
+
+    private void initGL() {
+        GL11.glViewport(0, 0, WIDTH, HEIGHT);
+
+        GL11.glMatrixMode(GL11.GL_PROJECTION);
+        GL11.glLoadIdentity();
+        GLU.gluPerspective(70f, (float) WIDTH / (float) HEIGHT, 0.1f, 1000f);
+
+        GL11.glMatrixMode(GL11.GL_MODELVIEW);
+        GL11.glLoadIdentity();
+
+        GL11.glEnable(GL11.GL_DEPTH_TEST);
+        GL11.glClearColor(0.12f, 0.14f, 0.18f, 1f);
+    }
+
+    private void gameLoop() {
+        while (!Display.isCloseRequested()) {
+            handleInput();
+
+            GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+
+            GL11.glLoadIdentity();
+            camera.lookThrough();
+
+            // draw a cube at origin
+            drawColoredCube(2.0f);
+
+            Display.update();
+            Display.sync(60); // cap at 60fps
+        }
+    }
+
+    private void handleInput() {
+        // quit on esc
+        if (Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
+            Display.destroy();
+            System.exit(0);
+        }
+
+        // mouse look (FPS-style)
+        float dx = Mouse.getDX();
+        float dy = Mouse.getDY();
+        camera.yaw(dx * MOUSE_SENS);
+        camera.pitch(-dy * MOUSE_SENS);
+
+        // flat plane movement (WASD or arrows)
+        boolean forward = Keyboard.isKeyDown(Keyboard.KEY_W) || Keyboard.isKeyDown(Keyboard.KEY_UP);
+        boolean back    = Keyboard.isKeyDown(Keyboard.KEY_S) || Keyboard.isKeyDown(Keyboard.KEY_DOWN);
+        boolean left    = Keyboard.isKeyDown(Keyboard.KEY_A) || Keyboard.isKeyDown(Keyboard.KEY_LEFT);
+        boolean right   = Keyboard.isKeyDown(Keyboard.KEY_D) || Keyboard.isKeyDown(Keyboard.KEY_RIGHT);
+
+        if (forward) camera.moveForward(MOVE_SPEED);
+        if (back)    camera.moveBackward(MOVE_SPEED);
+        if (left)    camera.strafeLeft(MOVE_SPEED);
+        if (right)   camera.strafeRight(MOVE_SPEED);
+
+        // vertical movement (space = up, left shift = down)
+        if (Keyboard.isKeyDown(Keyboard.KEY_SPACE))  camera.moveUp(MOVE_SPEED);
+        if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) camera.moveDown(MOVE_SPEED);
+    }
+
+    private void drawColoredCube(float size) {
+        float s = size / 2f;
+
+        GL11.glBegin(GL11.GL_QUADS);
+
+        // +X (right) - red
+        GL11.glColor3f(1f, 0f, 0f);
+        GL11.glVertex3f(+s, -s, -s);
+        GL11.glVertex3f(+s, -s, +s);
+        GL11.glVertex3f(+s, +s, +s);
+        GL11.glVertex3f(+s, +s, -s);
+
+        // -X (left) - green
+        GL11.glColor3f(0f, 1f, 0f);
+        GL11.glVertex3f(-s, -s, +s);
+        GL11.glVertex3f(-s, -s, -s);
+        GL11.glVertex3f(-s, +s, -s);
+        GL11.glVertex3f(-s, +s, +s);
+
+        // +Y (top) - blue
+        GL11.glColor3f(0f, 0f, 1f);
+        GL11.glVertex3f(-s, +s, -s);
+        GL11.glVertex3f(+s, +s, -s);
+        GL11.glVertex3f(+s, +s, +s);
+        GL11.glVertex3f(-s, +s, +s);
+
+        // -Y (bottom) - yellow
+        GL11.glColor3f(1f, 1f, 0f);
+        GL11.glVertex3f(-s, -s, +s);
+        GL11.glVertex3f(+s, -s, +s);
+        GL11.glVertex3f(+s, -s, -s);
+        GL11.glVertex3f(-s, -s, -s);
+
+        // +Z (front) - magenta
+        GL11.glColor3f(1f, 0f, 1f);
+        GL11.glVertex3f(-s, -s, +s);
+        GL11.glVertex3f(-s, +s, +s);
+        GL11.glVertex3f(+s, +s, +s);
+        GL11.glVertex3f(+s, -s, +s);
+
+        // -Z (back) - cyan
+        GL11.glColor3f(0f, 1f, 1f);
+        GL11.glVertex3f(+s, -s, -s);
+        GL11.glVertex3f(+s, +s, -s);
+        GL11.glVertex3f(-s, +s, -s);
+        GL11.glVertex3f(-s, -s, -s);
+
+        GL11.glEnd();
+
+        // reset color for anything else
+        GL11.glColor3f(1f, 1f, 1f);
+    }
+}
