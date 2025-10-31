@@ -13,10 +13,12 @@ public class Camera {
     private float x, y, z;
     private float yaw;   // left-right
     private float pitch; // up-down
+    public Chunk chunk;
 
     public Camera(float x, float y, float z) {
         this.x = x; this.y = y; this.z = z;
         this.yaw = 0f; this.pitch = 0f;
+        chunk = new Chunk((int)this.x, (int)this.y, (int)this.z);
     }
 
     public void yaw(float amount)   { yaw += amount; }

@@ -4,6 +4,9 @@
  */
 package finalproject;
 
+//-Djava.library.path=C:\Users\kaila\Desktop\CS4450\lwjgl-2.9.2\lwjgl-2.9.2\native\windows --enable-native-access=ALL-UNNAMED
+//-Djava.library.path="C:\Users\Husain\Desktop\Ch5\Fall 2025\CS 4450\lwjgl-2.9.2\lwjgl-2.9.2\native\windows"
+
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -11,6 +14,7 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
+import static org.lwjgl.opengl.GL11.*;
 
 public class Main {
 
@@ -64,6 +68,10 @@ public class Main {
 
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         GL11.glClearColor(0.12f, 0.14f, 0.18f, 1f);
+        
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glEnableClientState(GL_COLOR_ARRAY);
+        glEnable(GL_DEPTH_TEST);
     }
 
     private void gameLoop() {
@@ -76,7 +84,8 @@ public class Main {
             camera.lookThrough();
 
             // draw a cube at origin
-            drawColoredCube(2.0f);
+            //drawColoredCube(2.0f);
+            camera.chunk.render();
 
             Display.update();
             Display.sync(60); // cap at 60fps
