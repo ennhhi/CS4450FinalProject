@@ -22,7 +22,7 @@ public class Main {
     private static final int HEIGHT = 480;
 
     private static final float MOUSE_SENS = 0.18f;
-    private static final float MOVE_SPEED = 0.1f;
+    private static final float MOVE_SPEED = 0.3f;
 
     private Camera camera;
 
@@ -34,7 +34,7 @@ public class Main {
         initDisplay();
         initGL();
 
-        camera = new Camera(0f, 2f, 6f); // start a little back & up
+        camera = new Camera(0f, 50f, 90f); // start a little back & up
         Mouse.setGrabbed(true);          // lock cursor for FPS feel
 
         gameLoop();

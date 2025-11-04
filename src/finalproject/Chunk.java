@@ -5,6 +5,7 @@
 package finalproject;
 
 import java.nio.FloatBuffer;
+import java.io.InputStream;
 import java.util.Random;
 import org.lwjgl.BufferUtils;
 import static org.lwjgl.opengl.GL11.*;
@@ -12,7 +13,7 @@ import static org.lwjgl.opengl.GL15.*;
 
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
-import org.newdawn.slick.util.ResourceLoader;
+// import org.newdawn.slick.util.ResourceLoader;
 
 
 public class Chunk {
@@ -34,48 +35,65 @@ public class Chunk {
             glBindBuffer(GL_ARRAY_BUFFER, VBOColorHandle);
             glColorPointer(3, GL_FLOAT, 0, 0L);
             glBindBuffer(GL_ARRAY_BUFFER, VBOTextureHandle);
-            glBindTexture(GL_TEXTURE_2D, 1);
+            org.lwjgl.opengl.GL11.glBindTexture(org.lwjgl.opengl.GL11.GL_TEXTURE_2D, texture.getTextureID());
             glTexCoordPointer(2,GL_FLOAT,0,0L);
             glDrawArrays(GL_QUADS, 0, CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 24);
         glPopMatrix();
     }
     
-    public void rebuildMesh(float startX, float startY, float startZ){
-        VBOColorHandle = glGenBuffers();
-        VBOVertexHandle = glGenBuffers();
+    public void rebuildMesh(float startX, float startY, float startZ) {
+        VBOColorHandle   = glGenBuffers();
+        VBOVertexHandle  = glGenBuffers();
         VBOTextureHandle = glGenBuffers();
-        FloatBuffer VertexPositionData = BufferUtils.createFloatBuffer((CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE) * 6 * 12);
-        FloatBuffer VertexColorData = BufferUtils.createFloatBuffer((CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE) * 6 * 12);
-        
-        FloatBuffer VertexTextureData =
-        BufferUtils.createFloatBuffer((CHUNK_SIZE*
-        CHUNK_SIZE *CHUNK_SIZE)* 6 * 12);
 
-        for (float x = 0; x < CHUNK_SIZE; x += 1){
-            for (float z = 0; z < CHUNK_SIZE; z += 1){
-                for (float y = 0; y < CHUNK_SIZE; y += 1){
-                    VertexPositionData.put( createCube((float) (startX+x*CUBE_LENGTH), (float)(y*CUBE_LENGTH+(int)(CHUNK_SIZE*0.8)),(float)(startZ + z*CUBE_LENGTH)));
-                    VertexColorData.put( createCubeVertexCol (getCubeColor(Blocks[(int)x][(int)y][(int)z])));
-                    VertexTextureData.put( createTexCube((float) 0, (float)0,Blocks[(int)(x)][(int) (y)][(int) (z)]));
+        // Preallocate "worst case" sizes is fine even if we don't fill all of it.
+        FloatBuffer VertexPositionData = BufferUtils.createFloatBuffer(
+                (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE) * 6 * 12);
+        FloatBuffer VertexColorData = BufferUtils.createFloatBuffer(
+                (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE) * 6 * 12);
+        FloatBuffer VertexTextureData = BufferUtils.createFloatBuffer(
+                (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE) * 6 * 12);
+
+        for (int x = 0; x < CHUNK_SIZE; x++) {
+            for (int z = 0; z < CHUNK_SIZE; z++) {
+                for (int y = 0; y < CHUNK_SIZE; y++) {
+
+                    // ----- KEY GUARD: skip AIR cells -----
+                    Block block = Blocks[x][y][z];
+                    if (block == null) {
+                        continue;  // no geometry, no texcoords, no colors
+                    }
+
+                    // If you want the terrain closer to y≈0, drop the big offset here:
+                    float wx = startX + x * CUBE_LENGTH;
+                    float wy = /* startY + */ y * CUBE_LENGTH; // removed +(int)(CHUNK_SIZE*0.8)
+                    float wz = startZ + z * CUBE_LENGTH;
+
+                    VertexPositionData.put(createCube(wx, wy, wz));
+                    VertexColorData.put(createCubeVertexCol(getCubeColor(block)));
+                    VertexTextureData.put(createTexCube(0f, 0f, block));
                 }
             }
         }
-        
-        VertexTextureData.flip();
-        VertexColorData.flip();
+
+        // IMPORTANT: flip buffers before uploading to VBOs (if not already done elsewhere)
         VertexPositionData.flip();
+        VertexColorData.flip();
+        VertexTextureData.flip();
+
+        // Your existing VBO uploads (keep whatever you had here)
         glBindBuffer(GL_ARRAY_BUFFER, VBOVertexHandle);
         glBufferData(GL_ARRAY_BUFFER, VertexPositionData, GL_STATIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
         glBindBuffer(GL_ARRAY_BUFFER, VBOColorHandle);
         glBufferData(GL_ARRAY_BUFFER, VertexColorData, GL_STATIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        
+
         glBindBuffer(GL_ARRAY_BUFFER, VBOTextureHandle);
         glBufferData(GL_ARRAY_BUFFER, VertexTextureData, GL_STATIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
+
     
     public float[] createCubeVertexCol(float[] CubeColorArray){
         float[] cubeColors = new float[CubeColorArray.length * 4 * 6];
@@ -120,9 +138,20 @@ public class Chunk {
             x + offset, y - offset, z };
     }
     
+    // temporary coloring for troubleshooting, revert to all white when done
     public float[] getCubeColor(Block block) {
-        return new float[] {1,1,1};
+        if (block == null) return new float[]{0,0,0};
+        switch (block.GetID()) {
+            case 1: return new float[]{0.3f, 0.9f, 0.3f};  // GRASS green
+            case 2: return new float[]{0.95f, 0.9f, 0.5f}; // SAND yellow
+            case 3: return new float[]{0.4f, 0.6f, 1.0f};  // WATER blue
+            case 4: return new float[]{0.6f, 0.3f, 0.1f};  // DIRT brown
+            case 5: return new float[]{0.7f, 0.7f, 0.7f};  // STONE gray
+            case 6: return new float[]{0.2f, 0.2f, 0.2f};  // BEDROCK dark
+            default: return new float[]{1,1,1};
+        }
     }
+
     
     public static float[] createTexCube(float x, float y, Block block) {
         float offset = (1024f/16)/1024f;
@@ -335,36 +364,65 @@ public class Chunk {
     }
   
     public Chunk(int startX, int startY, int startZ){
-        try{
-            texture = TextureLoader.getTexture("PNG",
-            ResourceLoader.getResourceAsStream("terrain.png"));
-        }
-        catch(Exception e)
-        {
-            System.out.print("ER-ROAR!");
+        try (InputStream in = Chunk.class.getClassLoader().getResourceAsStream("finalproject/terrain.png")) {
+            if (in == null) {
+                throw new RuntimeException("terrain.png not found at finalproject/terrain.png");
+            }
+            texture = TextureLoader.getTexture("PNG", in, org.lwjgl.opengl.GL11.GL_NEAREST);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        r = new Random();
         Blocks = new Block[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE];
-        for (int x = 0; x < CHUNK_SIZE; x++){
-            for (int y = 0; y < CHUNK_SIZE; y++){
-                for (int z = 0; z < CHUNK_SIZE; z++){
-                    if(r.nextFloat()>0.7f){
-                        Blocks[x][y][z] = new
-                        Block(Block.BlockType.BlockType_Grass);
-                    } else if(r.nextFloat()>0.4f){
-                        Blocks[x][y][z] = new
-                        Block(Block.BlockType.BlockType_Dirt);
-                    }else if(r.nextFloat()>0.2f){
-                        Blocks[x][y][z] = new
-                        Block(Block.BlockType.BlockType_Water);
-                    }else{
-                        Blocks[x][y][z] = new
-                        Block(Block.BlockType.BlockType_Bedrock); // this is default but it runs an error??
+        SimplexNoise noise = new SimplexNoise(64, 0.5f, new Random().nextInt());
+
+        // controls how smooth the hills are
+        double scale = 0.0175;      // smaller = smoother terrain
+        double baseH = CHUNK_SIZE * 0.4;  // average ground topY
+        double amp   = CHUNK_SIZE * 0.3; // vertical variation
+
+        for (int x = 0; x < CHUNK_SIZE; x++) {
+            for (int z = 0; z < CHUNK_SIZE; z++) {
+                // calculate smooth topY for this column
+                double nx = (startX + x) * scale;
+                double nz = (startZ + z) * scale;
+                double h = noise.getNoise((int)(nx * 256), (int)(nz * 256))
+                         + 0.5 * noise.getNoise((int)(nx * 512), (int)(nz * 512));
+                h /= 1.5;
+                int topY = (int)Math.round(baseH + h * amp);
+                if (topY < 1) topY = 1;
+                if (topY > CHUNK_SIZE - 1) topY = CHUNK_SIZE - 1;
+
+                // fill the column
+                for (int y = 0; y < CHUNK_SIZE; y++) {
+                    Block.BlockType type;
+
+                    if (y == 0) {
+                        // bedrock floor
+                        type = Block.BlockType.BlockType_Bedrock;
+                        Blocks[x][y][z] = new Block(type);
+                    } else if (y < topY - 1) {
+                        // bulk stone up to just under the surface
+                        type = Block.BlockType.BlockType_Stone;
+                        Blocks[x][y][z] = new Block(type);
+                    } else if (y == topY - 1) {
+                        // a single dirt layer under the top
+                        type = Block.BlockType.BlockType_Dirt;
+                        Blocks[x][y][z] = new Block(type);
+                    } else if (y == topY) {
+                        // the surface block (varies by topY band)
+                        if (topY <= baseH * 0.55)      type = Block.BlockType.BlockType_Water;
+                        else if (topY <= baseH * 0.75) type = Block.BlockType.BlockType_Sand;
+                        else                            type = Block.BlockType.BlockType_Grass;
+                        Blocks[x][y][z] = new Block(type);
+                    } else {
+                        // *** AIR above the surface ***  ← this is the key change
+                        Blocks[x][y][z] = null;
                     }
                 }
             }
         }
+
         VBOColorHandle = glGenBuffers();
         VBOVertexHandle = glGenBuffers();
         VBOTextureHandle = glGenBuffers();
