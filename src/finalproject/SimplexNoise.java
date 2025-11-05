@@ -6,7 +6,7 @@ package finalproject;
 
 import java.util.Random;
 
-/** Lightweight 2D value-noise (Perlin-like) for CP2. */
+/* Lightweight 2D value-noise (Perlin-like) */
 public class SimplexNoise {
     private final int largestFeature;
     private final float persistence;
@@ -30,11 +30,11 @@ public class SimplexNoise {
         for (int i = 0; i < 512; i++) p[i] = base[i & 255];
     }
 
-    // Fade curve and linear interpolation
+    // fade curve and linear interpolation
     private static float fade(float t){ return t*t*t*(t*(t*6 - 15) + 10); }
     private static float lerp(float a, float b, float t){ return a + t*(b - a); }
 
-    // Pseudo-random gradient at integer lattice point
+    // pseudo-random gradient at integer lattice point
     private float grad(int x, int y){
         int h = p[(x + p[y & 255]) & 255] & 7; // 8 gradients
         switch(h){
@@ -48,7 +48,7 @@ public class SimplexNoise {
         }
     }
 
-    /** 2D value-noise, inputs can be any ints; returns ~[-1,1]. */
+    /* 2D value-noise, inputs can be any ints; returns ~[-1,1]. */
     public float getNoise(int x, int y){
         // scale down big coordinates so "largestFeature" acts as base frequency
         float fx = x / (float)largestFeature;
@@ -62,7 +62,7 @@ public class SimplexNoise {
         float sx = fade(fx - x0);
         float sy = fade(fy - y0);
 
-        // Corner values via hashed gradients
+        // corner values via hashed gradients
         float n00 = grad(x0, y0);
         float n10 = grad(x1, y0);
         float n01 = grad(x0, y1);

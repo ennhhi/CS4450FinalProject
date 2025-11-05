@@ -45,7 +45,7 @@ public class Camera {
     public void moveUp(float dist)   { y += dist; }
     public void moveDown(float dist) { y -= dist; }
 
-    /* call each frame before drawing world */
+    // call each frame before drawing world
     public void lookThrough() {
         GL11.glRotatef(pitch, 1f, 0f, 0f);
         GL11.glRotatef(yaw,   0f, 1f, 0f);

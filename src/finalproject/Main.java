@@ -4,8 +4,10 @@
  */
 package finalproject;
 
-//-Djava.library.path=C:\Users\kaila\Desktop\CS4450\lwjgl-2.9.2\lwjgl-2.9.2\native\windows --enable-native-access=ALL-UNNAMED
-//-Djava.library.path="C:\Users\Husain\Desktop\Ch5\Fall 2025\CS 4450\lwjgl-2.9.2\lwjgl-2.9.2\native\windows"
+/* ignore these 2 lines, used for changing Run settings when pulling from repo
+-Djava.library.path=C:\Users\kaila\Desktop\CS4450\lwjgl-2.9.2\lwjgl-2.9.2\native\windows --enable-native-access=ALL-UNNAMED
+-Djava.library.path="C:\Users\Husain\Desktop\Ch5\Fall 2025\CS 4450\lwjgl-2.9.2\lwjgl-2.9.2\native\windows" --enable-native-access=ALL-UNNAMED
+*/
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
@@ -124,6 +126,7 @@ public class Main {
         if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) camera.moveDown(MOVE_SPEED);
     }
 
+    /* NO LONGER USED AFTER CHECKPOINT 1
     private void drawColoredCube(float size) {
         float s = size / 2f;
 
@@ -175,5 +178,5 @@ public class Main {
 
         // reset color for anything else
         GL11.glColor3f(1f, 1f, 1f);
-    }
+    } */
 }

@@ -13,7 +13,6 @@ import static org.lwjgl.opengl.GL15.*;
 
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
-// import org.newdawn.slick.util.ResourceLoader;
 
 
 public class Chunk {
@@ -46,7 +45,7 @@ public class Chunk {
         VBOVertexHandle  = glGenBuffers();
         VBOTextureHandle = glGenBuffers();
 
-        // Preallocate "worst case" sizes is fine even if we don't fill all of it.
+        // preallocate "worst case" sizes
         FloatBuffer VertexPositionData = BufferUtils.createFloatBuffer(
                 (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE) * 6 * 12);
         FloatBuffer VertexColorData = BufferUtils.createFloatBuffer(
@@ -61,12 +60,11 @@ public class Chunk {
                     // ----- KEY GUARD: skip AIR cells -----
                     Block block = Blocks[x][y][z];
                     if (block == null) {
-                        continue;  // no geometry, no texcoords, no colors
+                        continue;
                     }
 
-                    // If you want the terrain closer to y≈0, drop the big offset here:
                     float wx = startX + x * CUBE_LENGTH;
-                    float wy = /* startY + */ y * CUBE_LENGTH; // removed +(int)(CHUNK_SIZE*0.8)
+                    float wy = /* startY + */ y * CUBE_LENGTH;
                     float wz = startZ + z * CUBE_LENGTH;
 
                     VertexPositionData.put(createCube(wx, wy, wz));
@@ -76,12 +74,10 @@ public class Chunk {
             }
         }
 
-        // IMPORTANT: flip buffers before uploading to VBOs (if not already done elsewhere)
         VertexPositionData.flip();
         VertexColorData.flip();
         VertexTextureData.flip();
 
-        // Your existing VBO uploads (keep whatever you had here)
         glBindBuffer(GL_ARRAY_BUFFER, VBOVertexHandle);
         glBufferData(GL_ARRAY_BUFFER, VertexPositionData, GL_STATIC_DRAW);
 
@@ -419,7 +415,7 @@ public class Chunk {
                         else                            type = Block.BlockType.BlockType_Grass;
                         Blocks[x][y][z] = new Block(type);
                     } else {
-                        // *** AIR above the surface ***  ← this is the key change
+                        // AIR above the surface
                         Blocks[x][y][z] = null;
                     }
                 }
