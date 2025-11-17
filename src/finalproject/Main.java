@@ -17,6 +17,9 @@ import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 import static org.lwjgl.opengl.GL11.*;
+import org.lwjgl.BufferUtils;
+import java.nio.FloatBuffer;
+
 
 public class Main {
 
@@ -27,6 +30,9 @@ public class Main {
     private static final float MOVE_SPEED = 0.3f;
 
     private Camera camera;
+    
+    private FloatBuffer lightPosition;
+    private FloatBuffer whiteLight;
 
     public static void main(String[] args) throws Exception {
         new Main().run();
@@ -64,6 +70,15 @@ public class Main {
         GL11.glMatrixMode(GL11.GL_PROJECTION);
         GL11.glLoadIdentity();
         GLU.gluPerspective(70f, (float) WIDTH / (float) HEIGHT, 0.1f, 1000f);
+        
+        initLightArrays();
+        glLight(GL_LIGHT0, GL_POSITION, lightPosition); //sets our light’s position
+        glLight(GL_LIGHT0, GL_SPECULAR, whiteLight);//sets our specular light
+        glLight(GL_LIGHT0, GL_DIFFUSE, whiteLight);//sets our diffuse light
+        glLight(GL_LIGHT0, GL_AMBIENT, whiteLight);//sets our ambient light
+        glEnable(GL_LIGHTING);//enables our lighting
+        glEnable(GL_LIGHT0);//enables light0
+
 
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
         GL11.glLoadIdentity();
@@ -95,6 +110,13 @@ public class Main {
             Display.update();
             Display.sync(60); // cap at 60fps
         }
+    }
+    
+    private void initLightArrays() {
+        lightPosition = BufferUtils.createFloatBuffer(4);
+        lightPosition.put(0.0f).put(0.0f).put(0.0f).put(1.0f).flip();
+        whiteLight = BufferUtils.createFloatBuffer(4);
+        whiteLight.put(1.0f).put(1.0f).put(1.0f).put(0.0f).flip();
     }
 
     private void handleInput() {
