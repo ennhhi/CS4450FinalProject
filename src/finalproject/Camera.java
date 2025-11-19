@@ -31,28 +31,33 @@ public class Camera {
         if (pitch < -90f) pitch = -90f;
     }
 
+    
     public void moveForward(float dist) {
-        float xOffset = dist * (float)Math.sin(Math.toRadians(yaw));
-        float zOffset = dist * (float)Math.cos(Math.toRadians(yaw));
+        float yawRad = (float)Math.toRadians(yaw);
+        float xOffset = dist * (float)Math.sin(yawRad);
+        float zOffset = dist * (float)Math.cos(yawRad);
+
+        x += xOffset;
+        z -= zOffset;
         
+        //FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
+        //lightPosition.put(x).put(y).put(z).put(1.0f).flip();
+        //glLight(GL_LIGHT0, GL_POSITION, lightPosition);
+    }
+
+    public void moveBackward(float dist) {
+        float yawRad = (float)Math.toRadians(yaw);
+        float xOffset = dist * (float)Math.sin(yawRad);
+        float zOffset = dist * (float)Math.cos(yawRad);
+
         x -= xOffset;
         z += zOffset;
         
-        FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
-        lightPosition.put(x-=xOffset).put(y).put(z+=zOffset).put(1.0f).flip();
-        glLight(GL_LIGHT0, GL_POSITION, lightPosition);
+        //FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
+        //lightPosition.put(x).put(y).put(z).put(1.0f).flip();
+        //glLight(GL_LIGHT0, GL_POSITION, lightPosition);
     }
 
-    public void moveBackward(float dist) { 
-        float xOffset = dist * (float)Math.sin(Math.toRadians(yaw));
-        float zOffset = dist * (float)Math.cos(Math.toRadians(yaw));
-        
-        FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
-        lightPosition.put(x-=xOffset).put(y).put(z+=zOffset).put(1.0f).flip();
-        glLight(GL_LIGHT0, GL_POSITION, lightPosition);
-        
-        moveForward(-dist); 
-    }
 
     public void strafeLeft(float dist) {
         x -= dist * (float)Math.sin(Math.toRadians(yaw + 90f));
@@ -67,9 +72,9 @@ public class Camera {
         
         y += dist; 
         
-        FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
-        lightPosition.put(x-=xOffset).put(y).put(z+=zOffset).put(1.0f).flip();
-        glLight(GL_LIGHT0, GL_POSITION, lightPosition);
+        //FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
+        //lightPosition.put(x-=xOffset).put(y).put(z+=zOffset).put(1.0f).flip();
+        //glLight(GL_LIGHT0, GL_POSITION, lightPosition);
     }
     public void moveDown(float dist) { 
         float xOffset = dist * (float)Math.sin(Math.toRadians(yaw));
@@ -77,9 +82,9 @@ public class Camera {
         
         y -= dist; 
         
-        FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
-        lightPosition.put(x-=xOffset).put(y).put(z+=zOffset).put(1.0f).flip();
-        glLight(GL_LIGHT0, GL_POSITION, lightPosition);
+        //FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
+        //lightPosition.put(x-=xOffset).put(y).put(z+=zOffset).put(1.0f).flip();
+        //glLight(GL_LIGHT0, GL_POSITION, lightPosition);
     }
 
     // call each frame before drawing world
@@ -87,8 +92,8 @@ public class Camera {
         GL11.glRotatef(pitch, 1f, 0f, 0f);
         GL11.glRotatef(yaw,   0f, 1f, 0f);
         GL11.glTranslatef(-x, -y, -z);
-        FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
-        lightPosition.put(x).put(y).put(z).put(1.0f).flip();
-        glLight(GL_LIGHT0, GL_POSITION, lightPosition);
+        //FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
+        //lightPosition.put(x).put(y).put(z).put(1.0f).flip();
+        //glLight(GL_LIGHT0, GL_POSITION, lightPosition);
     }
 }
