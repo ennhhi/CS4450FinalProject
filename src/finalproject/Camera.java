@@ -5,9 +5,15 @@
 package finalproject;
 
 import org.lwjgl.opengl.GL11;
-import static org.lwjgl.opengl.GL11.*;
-import org.lwjgl.BufferUtils;
-import java.nio.FloatBuffer;
+//import static org.lwjgl.opengl.GL11.*;
+//import org.lwjgl.BufferUtils;
+//import java.nio.FloatBuffer;
+
+/*
+ * DO NOT REMOVE COMMENTED-OUT CODE
+ * These code blocks are from the original lighting method we had. Keep in case 
+ * we need to revert. 
+*/
 
 /**
  * simple FPS-style camera
@@ -31,7 +37,6 @@ public class Camera {
         if (pitch < -90f) pitch = -90f;
     }
 
-    
     public void moveForward(float dist) {
         float yawRad = (float)Math.toRadians(yaw);
         float xOffset = dist * (float)Math.sin(yawRad);
@@ -57,7 +62,6 @@ public class Camera {
         //lightPosition.put(x).put(y).put(z).put(1.0f).flip();
         //glLight(GL_LIGHT0, GL_POSITION, lightPosition);
     }
-
 
     public void strafeLeft(float dist) {
         x -= dist * (float)Math.sin(Math.toRadians(yaw + 90f));

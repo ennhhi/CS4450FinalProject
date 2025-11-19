@@ -70,28 +70,53 @@ public class Main {
         GL11.glMatrixMode(GL11.GL_PROJECTION);
         GL11.glLoadIdentity();
         GLU.gluPerspective(70f, (float) WIDTH / (float) HEIGHT, 0.1f, 1000f);
-        
+
+        // ----- LIGHT SETUP (properties only) -----
         initLightArrays();
-        glLight(GL_LIGHT0, GL_POSITION, lightPosition); //sets our light’s position
-        glLight(GL_LIGHT0, GL_SPECULAR, whiteLight);//sets our specular light
-        glLight(GL_LIGHT0, GL_DIFFUSE, whiteLight);//sets our diffuse light
-        glLight(GL_LIGHT0, GL_AMBIENT, whiteLight);//sets our ambient light
-        glEnable(GL_LIGHTING);//enables our lighting
-        glEnable(GL_LIGHT0);//enables light0
 
+        FloatBuffer ambient = BufferUtils.createFloatBuffer(4);
+        ambient.put(0.8f).put(0.8f).put(0.8f).put(1.0f).flip();
 
+        glLight(GL_LIGHT0, GL_AMBIENT,  ambient);
+        glLight(GL_LIGHT0, GL_DIFFUSE,  whiteLight);
+        glLight(GL_LIGHT0, GL_SPECULAR, whiteLight);
+
+        glEnable(GL_LIGHTING);
+        glEnable(GL_LIGHT0);
+        glShadeModel(GL_SMOOTH);
+        
+        // ---- FILL LIGHT (shadow softening) ----
+        glEnable(GL_LIGHT1);
+
+        FloatBuffer fillDiffuse = BufferUtils.createFloatBuffer(4);
+        fillDiffuse.put(0.25f).put(0.25f).put(0.25f).put(1.0f).flip();
+        glLight(GL_LIGHT1, GL_DIFFUSE, fillDiffuse);
+
+        FloatBuffer fillAmbient = BufferUtils.createFloatBuffer(4);
+        fillAmbient.put(0.1f).put(0.1f).put(0.1f).put(1.0f).flip();
+        glLight(GL_LIGHT1, GL_AMBIENT, fillAmbient);
+
+        // opposite direction from main sun
+        FloatBuffer fillDir = BufferUtils.createFloatBuffer(4);
+        fillDir.put(-1.0f).put(-1.0f).put(1.0f).put(0.0f).flip();
+        glLight(GL_LIGHT1, GL_POSITION, fillDir);
+
+        // ----- MODELVIEW SETUP -----
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
         GL11.glLoadIdentity();
 
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         GL11.glClearColor(0.12f, 0.14f, 0.18f, 1f);
-        
+
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_COLOR_ARRAY);
         glEnable(GL_DEPTH_TEST);
-        
+
         glEnable(GL_TEXTURE_2D);
-        glEnableClientState (GL_TEXTURE_COORD_ARRAY);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        
+        glEnableClientState(GL_NORMAL_ARRAY);
+        glEnable(GL_NORMALIZE);
     }
 
     private void gameLoop() {
@@ -103,8 +128,8 @@ public class Main {
             GL11.glLoadIdentity();
             camera.lookThrough();
 
-            // draw a cube at origin
-            //drawColoredCube(2.0f);
+            glLight(GL_LIGHT0, GL_POSITION, lightPosition);
+            
             camera.chunk.render();
 
             Display.update();
@@ -114,9 +139,9 @@ public class Main {
     
     private void initLightArrays() {
         lightPosition = BufferUtils.createFloatBuffer(4);
-        lightPosition.put(0.0f).put(0.0f).put(0.0f).put(1.0f).flip();
+        lightPosition.put(1.0f).put(1.0f).put(-1.0f).put(0.0f).flip();
         whiteLight = BufferUtils.createFloatBuffer(4);
-        whiteLight.put(1.0f).put(1.0f).put(1.0f).put(0.0f).flip();
+        whiteLight.put(1.0f).put(1.0f).put(1.0f).put(1.0f).flip();
     }
 
     private void handleInput() {

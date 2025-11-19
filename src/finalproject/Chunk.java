@@ -21,6 +21,7 @@ public class Chunk {
     private Block[][][] Blocks;
     private int VBOVertexHandle;
     private int VBOColorHandle;
+    private int VBONormalHandle;
     private int StartX, StartY, StartZ;
     private Random r;
     
@@ -29,21 +30,34 @@ public class Chunk {
     
     public void render(){
         glPushMatrix();
+            // positions
             glBindBuffer(GL_ARRAY_BUFFER, VBOVertexHandle);
             glVertexPointer(3, GL_FLOAT, 0, 0L);
+
+            // normals  ← NEW
+            glBindBuffer(GL_ARRAY_BUFFER, VBONormalHandle);
+            glNormalPointer(GL_FLOAT, 0, 0L);
+
+            // colors
             glBindBuffer(GL_ARRAY_BUFFER, VBOColorHandle);
             glColorPointer(3, GL_FLOAT, 0, 0L);
+
+            // texcoords
             glBindBuffer(GL_ARRAY_BUFFER, VBOTextureHandle);
-            org.lwjgl.opengl.GL11.glBindTexture(org.lwjgl.opengl.GL11.GL_TEXTURE_2D, texture.getTextureID());
+            org.lwjgl.opengl.GL11.glBindTexture(org.lwjgl.opengl.GL11.GL_TEXTURE_2D,
+                                                 texture.getTextureID());
             glTexCoordPointer(2,GL_FLOAT,0,0L);
+
             glDrawArrays(GL_QUADS, 0, CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 24);
         glPopMatrix();
     }
+
     
     public void rebuildMesh(float startX, float startY, float startZ) {
         VBOColorHandle   = glGenBuffers();
         VBOVertexHandle  = glGenBuffers();
         VBOTextureHandle = glGenBuffers();
+        VBONormalHandle = glGenBuffers();
 
         // preallocate "worst case" sizes
         FloatBuffer VertexPositionData = BufferUtils.createFloatBuffer(
@@ -52,6 +66,8 @@ public class Chunk {
                 (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE) * 6 * 12);
         FloatBuffer VertexTextureData = BufferUtils.createFloatBuffer(
                 (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE) * 6 * 12);
+        FloatBuffer VertexNormalData = BufferUtils.createFloatBuffer(
+                (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE) * 6 * 12); // NEW
 
         for (int x = 0; x < CHUNK_SIZE; x++) {
             for (int z = 0; z < CHUNK_SIZE; z++) {
@@ -70,6 +86,7 @@ public class Chunk {
                     VertexPositionData.put(createCube(wx, wy, wz));
                     VertexColorData.put(createCubeVertexCol(getCubeColor(block)));
                     VertexTextureData.put(createTexCube(0f, 0f, block));
+                    VertexNormalData.put(createCubeNormals());
                 }
             }
         }
@@ -77,6 +94,7 @@ public class Chunk {
         VertexPositionData.flip();
         VertexColorData.flip();
         VertexTextureData.flip();
+        VertexNormalData.flip();
 
         glBindBuffer(GL_ARRAY_BUFFER, VBOVertexHandle);
         glBufferData(GL_ARRAY_BUFFER, VertexPositionData, GL_STATIC_DRAW);
@@ -87,10 +105,53 @@ public class Chunk {
         glBindBuffer(GL_ARRAY_BUFFER, VBOTextureHandle);
         glBufferData(GL_ARRAY_BUFFER, VertexTextureData, GL_STATIC_DRAW);
 
+        glBindBuffer(GL_ARRAY_BUFFER, VBONormalHandle);
+        glBufferData(GL_ARRAY_BUFFER, VertexNormalData, GL_STATIC_DRAW);
+        
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
-    
+    public float[] createCubeNormals() {
+        // 6 faces * 4 verts * (nx,ny,nz)
+        return new float[] {
+            // TOP (0, +1, 0)
+            0, 1, 0,
+            0, 1, 0,
+            0, 1, 0,
+            0, 1, 0,
+
+            // BOTTOM (0, -1, 0)
+            0, -1, 0,
+            0, -1, 0,
+            0, -1, 0,
+            0, -1, 0,
+
+            // FRONT (0, 0, -1)
+            0, 0, -1,
+            0, 0, -1,
+            0, 0, -1,
+            0, 0, -1,
+
+            // BACK (0, 0, +1)
+            0, 0, 1,
+            0, 0, 1,
+            0, 0, 1,
+            0, 0, 1,
+
+            // LEFT (-1, 0, 0)
+            -1, 0, 0,
+            -1, 0, 0,
+            -1, 0, 0,
+            -1, 0, 0,
+
+            // RIGHT (+1, 0, 0)
+            1, 0, 0,
+            1, 0, 0,
+            1, 0, 0,
+            1, 0, 0
+        };
+    }
+
     public float[] createCubeVertexCol(float[] CubeColorArray){
         float[] cubeColors = new float[CubeColorArray.length * 4 * 6];
         for (int i = 0; i < cubeColors.length; i++){
