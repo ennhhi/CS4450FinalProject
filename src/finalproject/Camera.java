@@ -5,15 +5,6 @@
 package finalproject;
 
 import org.lwjgl.opengl.GL11;
-//import static org.lwjgl.opengl.GL11.*;
-//import org.lwjgl.BufferUtils;
-//import java.nio.FloatBuffer;
-
-/*
- * DO NOT REMOVE COMMENTED-OUT CODE
- * These code blocks are from the original lighting method we had. Keep in case 
- * we need to revert. 
-*/
 
 /**
  * simple FPS-style camera
@@ -44,10 +35,6 @@ public class Camera {
 
         x += xOffset;
         z -= zOffset;
-        
-        //FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
-        //lightPosition.put(x).put(y).put(z).put(1.0f).flip();
-        //glLight(GL_LIGHT0, GL_POSITION, lightPosition);
     }
 
     public void moveBackward(float dist) {
@@ -57,10 +44,6 @@ public class Camera {
 
         x -= xOffset;
         z += zOffset;
-        
-        //FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
-        //lightPosition.put(x).put(y).put(z).put(1.0f).flip();
-        //glLight(GL_LIGHT0, GL_POSITION, lightPosition);
     }
 
     public void strafeLeft(float dist) {
@@ -70,25 +53,25 @@ public class Camera {
 
     public void strafeRight(float dist) { strafeLeft(-dist); }
 
-    public void moveUp(float dist)   { 
-        float xOffset = dist * (float)Math.sin(Math.toRadians(yaw));
-        float zOffset = dist * (float)Math.cos(Math.toRadians(yaw));
-        
+    public void moveUp(float dist)   {         
         y += dist; 
-        
-        //FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
-        //lightPosition.put(x-=xOffset).put(y).put(z+=zOffset).put(1.0f).flip();
-        //glLight(GL_LIGHT0, GL_POSITION, lightPosition);
     }
     public void moveDown(float dist) { 
-        float xOffset = dist * (float)Math.sin(Math.toRadians(yaw));
-        float zOffset = dist * (float)Math.cos(Math.toRadians(yaw));
-        
-        y -= dist; 
-        
-        //FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
-        //lightPosition.put(x-=xOffset).put(y).put(z+=zOffset).put(1.0f).flip();
-        //glLight(GL_LIGHT0, GL_POSITION, lightPosition);
+        y -= dist;
+    }
+
+    // Keep the camera position inside given bounds
+    public void clampToBounds(float minX, float maxX,
+                              float minY, float maxY,
+                              float minZ, float maxZ) {
+        if (x < minX) x = minX;
+        if (x > maxX) x = maxX;
+
+        if (y < minY) y = minY;
+        if (y > maxY) y = maxY;
+
+        if (z < minZ) z = minZ;
+        if (z > maxZ) z = maxZ;
     }
 
     // call each frame before drawing world
@@ -96,8 +79,21 @@ public class Camera {
         GL11.glRotatef(pitch, 1f, 0f, 0f);
         GL11.glRotatef(yaw,   0f, 1f, 0f);
         GL11.glTranslatef(-x, -y, -z);
-        //FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
-        //lightPosition.put(x).put(y).put(z).put(1.0f).flip();
-        //glLight(GL_LIGHT0, GL_POSITION, lightPosition);
+    }
+    
+    public float getX() {
+        return x;
+    }
+
+    public float getY() {
+        return y;
+    }
+
+    public float getZ() {
+        return z;
+    }
+
+    public void setY(float y) {
+        this.y = y;
     }
 }

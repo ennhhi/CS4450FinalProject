@@ -14,7 +14,6 @@ import static org.lwjgl.opengl.GL15.*;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 
-
 public class Chunk {
     static final int CHUNK_SIZE = 30;
     static final int CUBE_LENGTH = 2;
@@ -52,7 +51,6 @@ public class Chunk {
         glPopMatrix();
     }
 
-    
     public void rebuildMesh(float startX, float startY, float startZ) {
         VBOColorHandle   = glGenBuffers();
         VBOVertexHandle  = glGenBuffers();
@@ -212,7 +210,6 @@ public class Chunk {
         }*/
     }
 
-    
     public static float[] createTexCube(float x, float y, Block block) {
         float offset = (1024f/16)/1024f;
         switch (block.GetID()) {
@@ -490,6 +487,15 @@ public class Chunk {
         StartY = startY;
         StartZ = startZ;
         rebuildMesh(startX, startY, startZ);
+    }
+    
+    public int getTopSolidY(int blockX, int blockZ) {
+        for (int y = CHUNK_SIZE - 1; y >= 0; y--) {
+            if (Blocks[blockX][y][blockZ] != null) {
+                return y;
+            }
+        }
+        return 0;
     }
 }
 
