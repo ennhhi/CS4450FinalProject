@@ -60,7 +60,7 @@ public class Camera {
         y -= dist;
     }
 
-    // Keep the camera position inside given bounds
+    // keep camera position inside given bounds
     public void clampToBounds(float minX, float maxX,
                               float minY, float maxY,
                               float minZ, float maxZ) {

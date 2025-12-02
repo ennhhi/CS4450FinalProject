@@ -48,7 +48,7 @@ public class SimplexNoise {
         }
     }
 
-    /* 2D value-noise, inputs can be any ints; returns ~[-1,1]. */
+    /* 2D value-noise, inputs can be any ints; returns ~[-1,1] */
     public float getNoise(int x, int y){
         // scale down big coordinates so "largestFeature" acts as base frequency
         float fx = x / (float)largestFeature;

@@ -33,7 +33,7 @@ public class Chunk {
             glBindBuffer(GL_ARRAY_BUFFER, VBOVertexHandle);
             glVertexPointer(3, GL_FLOAT, 0, 0L);
 
-            // normals  ← NEW
+            // normals
             glBindBuffer(GL_ARRAY_BUFFER, VBONormalHandle);
             glNormalPointer(GL_FLOAT, 0, 0L);
 
@@ -65,7 +65,7 @@ public class Chunk {
         FloatBuffer VertexTextureData = BufferUtils.createFloatBuffer(
                 (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE) * 6 * 12);
         FloatBuffer VertexNormalData = BufferUtils.createFloatBuffer(
-                (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE) * 6 * 12); // NEW
+                (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE) * 6 * 12);
 
         for (int x = 0; x < CHUNK_SIZE; x++) {
             for (int z = 0; z < CHUNK_SIZE; z++) {
@@ -193,21 +193,8 @@ public class Chunk {
             x + offset, y - offset, z };
     }
     
-    // temporary coloring for troubleshooting, revert to all white when done
     public float[] getCubeColor(Block block) {
         return new float[]{1,1,1};
-        
-        /*
-        if (block == null) return new float[]{0,0,0};
-        switch (block.GetID()) {
-            case 1: return new float[]{0.3f, 0.9f, 0.3f};  // GRASS green
-            case 2: return new float[]{0.95f, 0.9f, 0.5f}; // SAND yellow
-            case 3: return new float[]{0.4f, 0.6f, 1.0f};  // WATER blue
-            case 4: return new float[]{0.6f, 0.3f, 0.1f};  // DIRT brown
-            case 5: return new float[]{0.7f, 0.7f, 0.7f};  // STONE gray
-            case 6: return new float[]{0.2f, 0.2f, 0.2f};  // BEDROCK dark
-            default: return new float[]{1,1,1};
-        }*/
     }
 
     public static float[] createTexCube(float x, float y, Block block) {
@@ -220,7 +207,7 @@ public class Chunk {
                 x + offset*2, y + offset*10,
                 x + offset*3, y + offset*9,
                 x + offset*2, y + offset*9,
-                // TOP!
+                // TOP
                 x + offset*3, y + offset*0,
                 x + offset*4, y + offset*0,
                 x + offset*3, y + offset*1,
@@ -434,9 +421,9 @@ public class Chunk {
         SimplexNoise noise = new SimplexNoise(64, 0.5f, new Random().nextInt());
 
         // controls how smooth the hills are
-        double scale = 0.0175;      // smaller = smoother terrain
-        double baseH = CHUNK_SIZE * 0.4;  // average ground topY
-        double amp   = CHUNK_SIZE * 0.3; // vertical variation
+        double scale = 0.0175;              // smaller = smoother terrain
+        double baseH = CHUNK_SIZE * 0.4;    // average ground topY
+        double amp   = CHUNK_SIZE * 0.3;    // vertical variation
 
         for (int x = 0; x < CHUNK_SIZE; x++) {
             for (int z = 0; z < CHUNK_SIZE; z++) {

@@ -51,7 +51,7 @@ public class Main {
         initGL();
 
         camera = new Camera(0f, 60f, 0f); // start a little back & up
-        Mouse.setGrabbed(true);           // lock cursor for FPS feel
+        Mouse.setGrabbed(true);           // lock cursor (FPS-style)
 
         gameLoop();
 
@@ -138,17 +138,17 @@ public class Main {
             float currentY = camera.getY();
 
             if (currentY > targetY) {
-                // We are above the ground -> fall down
+                // if above ground -> fall down
                 float newY = currentY - FALL_SPEED_PER_FRAME;
 
-                // Don't go below the ground
+                // don't go below ground
                 if (newY < targetY) {
                     newY = targetY;
                 }
 
                 camera.setY(newY);
             } else {
-                // We are at or below the ground -> snap to ground
+                // if at or below ground -> snap to ground
                 camera.setY(targetY);
             }
             
@@ -208,24 +208,23 @@ public class Main {
         float camX = camera.getX();
         float camZ = camera.getZ();
 
-        // Convert world coordinates to block indices inside the chunk
-        float startX = 0; // or 0 if your chunk starts at 0
+        // convert world coordinates to block indices inside chunk
+        float startX = 0; // or 0 if chunk starts at 0
         float startZ = 0;
 
         int blockX = (int) ((camX - startX) / Chunk.CUBE_LENGTH);
         int blockZ = (int) ((camZ - startZ) / Chunk.CUBE_LENGTH);
 
-        // Clamp to valid range so we don't go out of the chunk array
+        // clamp to valid range
         if (blockX < 0) blockX = 0;
         if (blockX >= Chunk.CHUNK_SIZE) blockX = Chunk.CHUNK_SIZE - 1;
 
         if (blockZ < 0) blockZ = 0;
         if (blockZ >= Chunk.CHUNK_SIZE) blockZ = Chunk.CHUNK_SIZE - 1;
 
-        // Use the helper you added in Chunk
         var topBlockYIndex = camera.chunk.getTopSolidY(blockX, blockZ);
 
-        // Convert block index to world Y coordinate of the top surface of that block
+        // convert block index to world Y coordinate of the top surface of that block
         float startY = 0; // often 0
         float groundY = startY + topBlockYIndex * Chunk.CUBE_LENGTH;
 
@@ -233,29 +232,29 @@ public class Main {
     }
     
     private void updateDayNightCycle() {
-        // Advance time; tweak timeOfDay for faster/slower cycle
+        // advance time
         timeOfDay += 0.005f;
         if (timeOfDay > Math.PI * 2) {
             timeOfDay -= (float)(Math.PI * 2);
         }
 
-        // Sun direction moves in a vertical circle
+        // sun direction moves in vertical circle
         float sunX = (float) Math.cos(timeOfDay);
         float sunY = (float) Math.sin(timeOfDay);
-        float sunZ = 0.3f; // slight tilt so it’s not perfectly flat
+        float sunZ = 0.3f; // slight tilt
 
-        // Update lightPosition (directional light => w = 0)
+        // update lightPosition (directional light => w = 0)
         lightPosition.clear();
         lightPosition.put(sunX).put(sunY).put(sunZ).put(0.0f).flip();
 
-        // Brightness factor t: 0 = darkest night, 1 = brightest day
+        // brightness factor t: 0 = darkest night, 1 = brightest day
         float t = (float) ((sunY + 1.0) / 2.0); // map [-1,1] → [0,1]
         if (t < 0f) t = 0f;
         if (t > 1f) t = 1f;
 
         // --- Main sun light (GL_LIGHT0) ---
 
-        // Diffuse: strong in day, very weak at night
+        // diffuse (strong in day, weak at night)
         FloatBuffer diffuse = BufferUtils.createFloatBuffer(4);
         diffuse
             .put(0.1f + 0.9f * t)  // R
@@ -265,7 +264,7 @@ public class Main {
             .flip();
         glLight(GL_LIGHT0, GL_DIFFUSE, diffuse);
 
-        // Ambient: a bit higher at night so it’s not pitch black
+        // ambient (a bit higher at night so it’s not pitch black)
         FloatBuffer ambient = BufferUtils.createFloatBuffer(4);
         ambient
             .put(0.25f - 0.15f * t) // brighter at night, dimmer in day
@@ -277,7 +276,7 @@ public class Main {
 
         // --- Sky color (background) ---
 
-        // Blend between night (dark blue) and day (light blue)
+        // blend between night (dark blue) and day (light blue)
         float skyR = 0.02f + 0.10f * t;
         float skyG = 0.02f + 0.22f * t;
         float skyB = 0.08f + 0.35f * t;
